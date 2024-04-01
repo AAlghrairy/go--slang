@@ -1696,15 +1696,15 @@ expression_statement
 
 iteration_statement
   = "do" _ body:statement _ "while" _ "(" _ condition:expression _ ")" _ ";" { return generateNode("DoWhileLoop", { condition, body }); } // dowhile loops need to end with a ';'
-  / "while" _ "(" _ condition:expression _ ")" _ body:statement { return generateNode("WhileLoop", { condition, body }); }
-  / "for" _ "(" _ clause:(@expression _)? ";" _ condition:(@expression _)? ";" _ update:(@expression _)? ")" _ body:statement { return generateNode("ForLoop", { clause: clause === null ? null : { type: "Expression", value: clause }, condition, update, body }); }
-  / "for" _ "(" _ clause:declaration _ condition:(@expression _)? ";" _ update:(@expression _)? ")" _ body:statement { return createDeclarationForLoopNode(clause, condition, update, body);  }
+  / "for" _ condition:expression _ body:statement { return generateNode("WhileLoop", { condition, body }); }
+  / "for" _  clause:(@expression _)? ";" _ condition:(@expression _)? ";" _ update:(@expression _)? body:statement { return generateNode("ForLoop", { clause: clause === null ? null : { type: "Expression", value: clause }, condition, update, body }); }
+  / "for" _ clause:declaration _ condition:(@expression _)? ";" _ update:(@expression _)? body:statement { return createDeclarationForLoopNode(clause, condition, update, body);  }
 
 // ========== Selection Statement ===========
 
 selection_statement
-  = "if" _ "(" _ condition:expression _ ")" _ ifStatement:statement _ "else" _ elseStatement:statement { return generateNode("SelectionStatement", { condition, ifStatement, elseStatement }); } 
-  / "if" _ "(" _ condition:expression _ ")" _ ifStatement:statement { return generateNode( "SelectionStatement", { condition, ifStatement }); }
+  = "if" _ condition:expression _ ifStatement:statement _ "else" _ elseStatement:statement { return generateNode("SelectionStatement", { condition, ifStatement, elseStatement }); }
+  / "if" _ condition:expression _ ifStatement:statement { return generateNode( "SelectionStatement", { condition, ifStatement }); }
   / "switch" _ "(" _ targetExpression:expression _ ")" _ "{" _ cases:switch_statement_case|1.., _| defaultStatements:(_ @switch_default_case)? _ "}"  { return createSwitchStatementNode(targetExpression, cases, defaultStatements ?? []); }
   / "switch" _ "(" _ targetExpression:expression _ ")" _ "{" _ defaultStatements:switch_default_case _ "}"  { return createSwitchStatementNode(targetExpression, [], defaultStatements); }
   / "switch" _ "(" _ targetExpression:expression _ ")" _ "{" _ "}" { return createSwitchStatementNode(targetExpression, [], []); } // functionally useless except for potentially side effect expression
