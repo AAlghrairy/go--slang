@@ -1653,8 +1653,8 @@ translation_unit
   = items:(function_definition / declaration)|.., _| { return createRootNode(items); }
    
 function_definition
-	= declarationSpecifier:declaration_specifier _ declarator:declarator _ body:compound_statement { return generateFunctionDefinitionNode([declarationSpecifier], declarator, body); } 
-  / declarationSpecifiers:declaration_specifiers _ declarator:declarator _ body:compound_statement { return generateFunctionDefinitionNode(declarationSpecifiers, declarator, body); }
+	= "func" _ declarator:declarator _ declarationSpecifier:declaration_specifier _ body:compound_statement { return generateFunctionDefinitionNode([declarationSpecifier], declarator, body); }
+  / "func" _ declarator:declarator _ declarationSpecifiers:declaration_specifiers _ body:compound_statement { return generateFunctionDefinitionNode(declarationSpecifiers, declarator, body); }
 
 
 // ======= Statements ==========
@@ -1856,9 +1856,9 @@ parameter_list
   = parameters:parameter_declaration|1.., _ "," _| { return unpackParameters(parameters); }
 
 parameter_declaration
-  = declarationSpecifier:declaration_specifier _ declarator:declarator { return processParameterDeclaration([declarationSpecifier], declarator); }
-  / declarationSpecifiers:declaration_specifiers _ declarator:declarator { return processParameterDeclaration(declarationSpecifiers, declarator); }
-  / declarationSpecifiers:declaration_specifiers _ abstractDeclarator:abstract_declarator { return processParameterDeclaration(declarationSpecifiers, abstractDeclarator); } 
+  = declarator:declarator _ declarationSpecifier:declaration_specifier  { return processParameterDeclaration([declarationSpecifier], declarator); }
+  /  declarator:declarator _ declarationSpecifiers:declaration_specifiers { return processParameterDeclaration(declarationSpecifiers, declarator); }
+  / abstractDeclarator:abstract_declarator _ declarationSpecifiers:declaration_specifiers  { return processParameterDeclaration(declarationSpecifiers, abstractDeclarator); }
   / declarationSpecifiers:declaration_specifiers { return processParameterDeclaration(declarationSpecifiers, null); }// to support function declarations without explicit function paramter names 
 
 // an abstract declarator is specifically for function declaration parameters that do not have names given to them
