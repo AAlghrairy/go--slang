@@ -1996,7 +1996,7 @@ token
   / punctuator 
 
 include  // custom keyword for specifying modules to import
-  = "#include <" identifier:identifier ">" { addIncludedModuleDefinitions(identifier); return identifier; } // add all the functions and structs declared in the module into the namespace
+  = "import " identifier:identifier { addIncludedModuleDefinitions(identifier); return identifier; } // add all the functions and structs declared in the module into the namespace
 
 keyword  // must be ordered in descending order of length, as longer keywords take precedence in matching
   = "_Static_assert"/"_Thread_local"/"_Imaginary"/"_Noreturn"/"continue"/"register"/"restrict"/"unsigned"/"volatile"/"_Alignas"/"_Alignof"/"_Complex"/"_Generic"/"default"/"typedef"/"_Atomic"/"extern"/"inline"/"double"/"return"/"signed"/"sizeof"/"static"/"struct"/"switch"/"break"/"float"/"const"/"short"/"union"/"while"/"_Bool"/"auto"/"case"/"char"/"goto"/"long"/"else"/"enum"/"void"/"for"/"int"/"if"/"do"
