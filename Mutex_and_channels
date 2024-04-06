@@ -1,0 +1,91 @@
+function make_channel() {
+    let variable = undefined;
+    const mutex = make_mutex();
+    function the_channel(type, write) {
+        if (type === "write") {
+            if (variable === undefined) {
+                variable = write;
+            } else {
+                lock(mutex);
+                if (variable === undefined) {
+                    variable = write;
+                    unlock(mutex);
+                }
+                // error("Channel already written");
+            }
+        } else if (type === "read") {
+            if (variable === undefined) {
+                lock(mutex);
+                if (variable !== undefined) {
+                    const temp = variable;
+                    unlock(mutex);
+                    return temp;
+                }
+            } else {
+                const temp = variable;
+                variable = undefined;
+                return temp;
+            }
+        } else {
+            error(type, "unknown type -- channel");
+        }
+    }
+    
+    return the_channel;
+}
+
+function read(channel) {
+    return channel("read", 0);
+}
+
+function write(channel, write) {
+    return channel("write", write);//(write);
+}
+
+
+function make_mutex() { // based on make_mutex in SICPJS 3.4.2
+    const cell = list(false);
+    function the_mutex(m) {
+        return m === "lock"
+               ? go_test_set(cell)
+                 ? the_mutex("lock") // retry
+                 : true
+               : m === "unlock"
+               ? clear(cell)
+               : error(m, "unknown request -- mutex");
+    }
+    return the_mutex;
+}
+
+function clear(cell) {
+    set_head(cell, false);
+}
+
+
+function go_test_set(cell) { // from test_and_set in 3.4.2
+    if (head(cell)) {
+        return true;
+    } else {
+        set_head(cell, true);
+        return false;
+    }
+}
+
+function lock(M) {
+    M("lock");
+    return true;
+}
+
+function unlock(M) {
+    M("unlock");
+    return true;
+}
+
+
+const channel = make_channel();
+concurrent_execute(() => { display(read(channel)); },
+                   () => { write(channel, 15); },
+                   () => { display(read(channel)); },
+                   () => { write(channel, 10); },
+                   () => { display(read(channel)); },
+                   () => { write(channel, 5); });
