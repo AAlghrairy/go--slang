@@ -2,32 +2,41 @@ function make_channel() {
     let variable = undefined;
     const mutex = make_mutex();
     function the_channel(type, write) {
+        lock(mutex);
         if (type === "write") {
             if (variable === undefined) {
                 variable = write;
+                unlock(mutex);
             } else {
-                lock(mutex);
                 if (variable === undefined) {
                     variable = write;
                     unlock(mutex);
+                } else {
+                    unlock(mutex);
+                    the_channel(type, write); //recursive write
                 }
                 // error("Channel already written");
             }
         } else if (type === "read") {
             if (variable === undefined) {
-                lock(mutex);
                 if (variable !== undefined) {
                     const temp = variable;
+                    variable = undefined;
                     unlock(mutex);
                     return temp;
+                } else {
+                    unlock(mutex);
+                    the_channel(type, write); //recursive read
                 }
             } else {
                 const temp = variable;
                 variable = undefined;
+                unlock(mutex);
                 return temp;
             }
         } else {
             error(type, "unknown type -- channel");
+            unlock(mutex);
         }
     }
     
@@ -47,7 +56,7 @@ function make_mutex() { // based on make_mutex in SICPJS 3.4.2
     const cell = list(false);
     function the_mutex(m) {
         return m === "lock"
-               ? go_test_set(cell)
+               ? test_and_set(cell)
                  ? the_mutex("lock") // retry
                  : true
                : m === "unlock"
@@ -61,16 +70,6 @@ function clear(cell) {
     set_head(cell, false);
 }
 
-
-function go_test_set(cell) { // from test_and_set in 3.4.2
-    if (head(cell)) {
-        return true;
-    } else {
-        set_head(cell, true);
-        return false;
-    }
-}
-
 function lock(M) {
     M("lock");
     return true;
@@ -81,11 +80,44 @@ function unlock(M) {
     return true;
 }
 
-
+let x = 0;
 const channel = make_channel();
-concurrent_execute(() => { display(read(channel)); },
+const channel2 = make_channel();
+
+const channel3 = make_channel();
+
+//const mutex = make_mutex();
+
+// concurrent_execute(() => {
+//     for(let i = 0; i < 100; i=i+1) {
+//         lock(mutex);
+//         x = x + 1;
+//         display(x);
+//         unlock(mutex);
+//     }
+    
+// },
+// () => {
+//     for(let j = 0; j < 100; j=j+1) {
+//         lock(mutex);
+//         x = x - 1;
+//         display(x);
+//         unlock(mutex);
+//     }
+// }
+// );
+
+// concurrent_execute(() => { write(channel, 15); display(read(channel)); },
+//                   () => { write(channel, 10); display(read(channel)); },
+//                   () => { write(channel, 5); display(read(channel)); }
+//                   );
+
+/*concurrent_execute(() => { display(read(channel)); },
                    () => { write(channel, 15); },
                    () => { display(read(channel)); },
                    () => { write(channel, 10); },
                    () => { display(read(channel)); },
-                   () => { write(channel, 5); });
+                   () => { write(channel, 5); });*/
+                   
+concurrent_execute(() => { display(read(channel)); },
+                  () => { write(channel, 15); });
