@@ -108,6 +108,10 @@ const channel3 = make_channel();
 //                   () => { write(channel, 10); },
 //                   () => { display(read(channel)); },
 //                   () => { write(channel, 5); });
-                   
-// concurrent_execute(() => { write(channel, 15); },
+
+// for(let i = 0; i < 60; i=i+1) {
+//     concurrent_execute(() => { write(channel, 1); },
+//                   () => { display(read(channel)); },
+//                   () => { write(channel, 2); },
 //                   () => { display(read(channel)); });
+// }
