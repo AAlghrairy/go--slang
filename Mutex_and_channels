@@ -9,14 +9,14 @@ function make_channel() {
                 unlock(mutex);
             } else {
                 unlock(mutex);
-                the_channel(type, write); //recursive write
+                return the_channel(type, write); //recursive write
                 
                 // error("Channel already written");
             }
         } else if (type === "read") {
             if (variable === undefined) {
                 unlock(mutex);
-                the_channel(type, write); //recursive read
+                return the_channel(type, write); //recursive read
                 
             } else {
                 const temp = variable;
@@ -102,12 +102,12 @@ const channel3 = make_channel();
 //                   () => { write(channel, 5); display(read(channel)); }
 //                   );
 
-/*concurrent_execute(() => { display(read(channel)); },
-                   () => { write(channel, 15); },
-                   () => { display(read(channel)); },
-                   () => { write(channel, 10); },
-                   () => { display(read(channel)); },
-                   () => { write(channel, 5); });*/
-                   
 // concurrent_execute(() => { display(read(channel)); },
-//                   () => { write(channel, 15); });
+//                   () => { write(channel, 15); },
+//                   () => { display(read(channel)); },
+//                   () => { write(channel, 10); },
+//                   () => { display(read(channel)); },
+//                   () => { write(channel, 5); });
+                   
+// concurrent_execute(() => { write(channel, 15); },
+//                   () => { display(read(channel)); });
