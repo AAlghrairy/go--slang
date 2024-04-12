@@ -56,10 +56,6 @@ function make_mutex() { // based on make_mutex in SICPJS 3.4.2
     return the_mutex;
 }
 
-function clear(cell) {
-    set_head(cell, false);
-}
-
 function lock(M) {
     M("lock");
     return true;
